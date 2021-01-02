@@ -11,7 +11,7 @@
           rel="noopener noreferrer"
           class="button--green"
         >
-          Sponsored by Forstek
+          Created by forstek
         </a>
         <a
           href="https://github.com/inovramadani/firem"
@@ -22,8 +22,33 @@
           GitHub
         </a>
       </div>
-      <div class='subtitle'>
-        here the test result:
+      <TestInput 
+        :apiUrl="apiUrl" 
+        :token="token" 
+        :httpMethod="httpMethod"
+        :nbOfCalls="nbOfCalls"
+        @changeUrl="onChangeUrl"
+        @changeToken="onChangeToken"
+        @changeHttpMehod="onChangeHttpMethod"
+        @changeNbOfCalls="onChangeNbOfCalls"
+        @start="onStart"
+        @clear="onClear"
+      />
+      <Summary
+        :totalSuccess="successCalls.length"
+        :totalFailed="failedCalls.length"
+        :minTime="minTime"
+        :maxTime="maxTime"
+        :avgTime="avgTime"
+      />
+      <div v-for="(call, idx) in successCalls" :key="`call.time.getTime() + ${idx}`">
+        <ResponseView
+          :index="idx + 1"
+          :status="call.response.status"
+          :callTime="call.time.getTime()"
+          :data="JSON.stringify(call.response.data)"
+          :responseTime="call.response.time.getTime() - call.time.getTime()"
+        />
       </div>
     </div>
   </div>
@@ -32,106 +57,147 @@
 <script lang="ts">
 import Vue from 'vue'
 import axios from 'axios'
-const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOWVmNjk1OTAtZDJiMy0xMWU5LTgxMmEtNDEyNjkwNzA4MTlhIiwidWlkIjoyNDQ3OSwidXNlcm5hbWUiOiIwMDJAaXFiYWwuY29tIiwiY2hhbm5lbElkcyI6Wzg3NjEsODk0Nyw4OTQ4LDg5NDksODk1MCw4OTUxLDEzMjQ1LDEzMzE3LDEzNjI0XSwicHJpdmlsZWdlIjoxfQ.8Uo7G5_KhH5tj4MeJ4IW_qZKDbezrTviFhEv1Iw8gmo'
-const calls = {}
-let summaryTimeout = null
 
-function showSummary (calls) {
-  if (summaryTimeout) clearTimeout(summaryTimeout)
-  summaryTimeout = setTimeout(() => {
-    const callsArray = Object.keys(calls).map(key => calls[key])
-    const successCalls = callsArray.filter(call => call.response != null)
-    const failedCalls = callsArray.filter(call => call.response == null)
-    // console.log('calls: ', calls)
-    // console.log('callsArray: ', callsArray)
-    const maxTime = Math.max(...successCalls.map(call => call.response.time - call.time))
-    const minTime = Math.min(...successCalls.map(call => call.response.time - call.time))
-    const avgTime = successCalls.reduce((acc, call) => acc + (call.response.time - call.time), 0) / successCalls.length
+let summaryTimeout: any = null
+export default Vue.extend({
+  data () {
+    return {
+      successCalls: [],
+      failedCalls: [],
+      maxTime: 0,
+      minTime: 0,
+      avgTime: 0,
+      apiUrl: '',
+      token: '',
+      httpMethod: 'get',
+      nbOfCalls: 0
+    }
+  },
 
-    console.log('maxTime: %d ms', maxTime)
-    console.log('minTime: %d ms', minTime)
-    console.log('avgTime: %d ms', avgTime)
+  methods: {
+    showSummary (calls) {
+      /** commented out to see results changing, uncomment to see one update at last response */
+      // if (summaryTimeout) clearTimeout(summaryTimeout)
+      // summaryTimeout = setTimeout(() => {
+        const callsArray = Object.keys(calls).map(key => calls[key])
+        const successCalls = callsArray.filter(call => call.response != null)
+        const failedCalls = callsArray.filter(call => call.response == null)
+        
+        this.successCalls = successCalls
+        this.failedCalls = failedCalls
 
-    console.log('success calls: ', successCalls.length)
-    console.log('failed calls: ', failedCalls.length)
-    // console.log('success calls: ', successCalls.length, successCalls)
-    // console.log('failed calls: ', failedCalls.length, failedCalls)
-  }, 1000)
-}
+        const maxTime = Math.max(...successCalls.map(call => call.response.time - call.time))
+        const minTime = Math.min(...successCalls.map(call => call.response.time - call.time))
+        const avgTime = successCalls.reduce((acc, call) => acc + (call.response.time - call.time), 0) / successCalls.length
 
-for (let i = 0; i < 10000; i++) {
-  // console.log('call #', i+1, new Date().getTime())
-  calls[i] = { time: new Date() }
-  const url = 'http://localhost:8080/api/v1/presence?userId=24479'
-  // const url = i % 2 === 0 ? 'http://localhost:8080/api/v1/presence?userId=24479' : 'random'
-  // const url = 'https://presence-staging.voiceping.info'
-  const method = 'get'
-  const data = { idx: i }
-  const headers = { Authorization: `Bearer ${token}`}
+        this.maxTime = maxTime
+        this.minTime = minTime
+        this.avgTime = avgTime
+      // }, 1000)
+    },
 
-  axios({ 
-    method,
-    url,
-    data,
-    headers
-  })
-    .then(res => {
-      // console.log('res #', i+1, new Date().getTime(), res.status, res.data)
-      const result = {
-        status: res.status, 
-        data: res.data,
-        time: new Date()
-      }
+    onChangeUrl (url) {
+      this.apiUrl = url
+    },
 
-      calls[i] = { 
-        ...calls[i], 
-        response: result
-      }
+    onChangeToken (token) {
+      this.token = token
+    },
 
-      showSummary(calls)
+    onChangeHttpMethod (method) {
+      this.httpMethod = method
+    },
 
-      return result
-    }, 
-    err => {
-      const { response: error } = err
-      // console.log('err: ', error)
-      if (error) {
-        const configData = JSON.parse(error.config.data)
-        if (configData && configData.idx) {
-          const callIdx = configData.idx
-  
-          if (callIdx != null) {
-            calls[callIdx] = { 
-              ...calls[callIdx], 
-              reject: {
-                status: error.status,
-                message: error.statusText
+    onChangeNbOfCalls (amount) {
+      this.nbOfCalls = amount
+    },
+
+    resetFields () {
+      this.successCalls = []
+      this.failedCalls = []
+      this.maxTime = 0
+      this.minTime = 0
+      this.avgTime = 0
+      this.apiUrl = ''
+      this.token = ''
+      this.httpMethod = 'get',
+      this.nbOfCalls = 0
+    },
+
+    onClear () {
+      this.resetFields()
+    },
+
+    onStart () {
+      console.log('url - token: ', this.apiUrl, this.token)
+      const url = this.apiUrl
+      const token = this.token
+      // const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOWVmNjk1OTAtZDJiMy0xMWU5LTgxMmEtNDEyNjkwNzA4MTlhIiwidWlkIjoyNDQ3OSwidXNlcm5hbWUiOiIwMDJAaXFiYWwuY29tIiwiY2hhbm5lbElkcyI6Wzg3NjEsODk0Nyw4OTQ4LDg5NDksODk1MCw4OTUxLDEzMjQ1LDEzMzE3LDEzNjI0XSwicHJpdmlsZWdlIjoxfQ.8Uo7G5_KhH5tj4MeJ4IW_qZKDbezrTviFhEv1Iw8gmo'
+      const calls: any = {}
+      const numberOfCalls = this.nbOfCalls
+
+      for (let i = 0; i < numberOfCalls; i++) {
+      // console.log('call #', i+1, new Date().getTime())
+      calls[i] = { time: new Date() }
+      // const url = 'https://presence-staging.voiceping.info/version'
+      // const url = 'https://presence-staging.voiceping.info/api/v1/presence?userId=24479'
+      // const url = 'http://localhost:8080/api/v1/presence?userId=24479'
+      const method = this.httpMethod
+      const data = { idx: i }
+      const headers = { Authorization: `Bearer ${token}`}
+
+      axios({ 
+        method,
+        url,
+        data,
+        headers
+      })
+        .then(res => {
+          // console.log('res #', i+1, new Date().getTime(), res.status, res.data)
+          const result = {
+            status: res.status, 
+            data: res.data,
+            time: new Date()
+          }
+
+          calls[i] = { 
+            ...calls[i], 
+            response: result
+          }
+
+          this.showSummary(calls)
+
+          return result
+        }, 
+        err => {
+          const { response: error } = err
+          console.log('err: ', error)
+          if (error) {
+            const configData = JSON.parse(error.config.data)
+            if (configData && configData.idx) {
+              const callIdx = configData.idx
+      
+              if (callIdx != null) {
+                calls[callIdx] = { 
+                  ...calls[callIdx], 
+                  reject: {
+                    status: error.status,
+                    message: error.statusText
+                  }
+                }
               }
             }
+      
+            this.showSummary(calls)
           }
-        }
-  
-        showSummary(calls)
+        })
+        .catch(err => {
+          console.log('err2: ', err)
+        })
       }
-    })
-    .catch(err => {
-      console.log('err2: ', err)
-    })
-
-  
-  // axios.post(
-  //   `${url}/api/v1/presence`,
-  //   null,
-  //   { headers: { Authorization: `Bearer ${token}`}}
-  // )
-  //   .then(res => {
-  //     console.log('res #', i+1, new Date().getTime(), res.status, res.data)
-  //   })
-}
-
-// window.calls = calls
-
-export default Vue.extend({})
+    }
+  }
+})
 </script>
 
 <style>
