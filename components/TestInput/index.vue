@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="input-container">
     <select @change="onChangeAuth">
       <option value="noAuth">No auth</option>
       <option value="bearer">Bearer token</option>
@@ -29,8 +29,8 @@
       min="0"
       @change="onChangeNbOfCalls"
     />
-    <Button @click="$emit('start')" class='primary'>Start</Button>
-    <Button @click="$emit('clear')" class='primary'>Clear</Button>
+    <button @click="$emit('start')" class='btn btn-primary'>Start</button>
+    <button @click="$emit('clear')" class='btn btn-primary'>Clear</button>
   </div>
 </template>
 
@@ -72,3 +72,9 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style scoped>
+  .input-container {
+    margin-top: 32px;
+  }
+</style>

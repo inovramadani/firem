@@ -41,14 +41,19 @@
         :maxTime="maxTime"
         :avgTime="avgTime"
       />
-      <div v-for="(call, idx) in successCalls" :key="`call.time.getTime() + ${idx}`">
-        <ResponseView
-          :index="idx + 1"
-          :status="call.response.status"
-          :callTime="call.time.getTime()"
-          :data="JSON.stringify(call.response.data)"
-          :responseTime="call.response.time.getTime() - call.time.getTime()"
-        />
+      <div class="responses-container">
+        <div 
+          v-for="(call, idx) in successCalls" 
+          :key="`call.time.getTime() + ${idx}`"
+        >
+          <ResponseView
+            :index="idx + 1"
+            :status="call.response.status"
+            :calledAt="call.time.getTime()"
+            :data="JSON.stringify(call.response.data)"
+            :responseTime="call.response.time.getTime() - call.time.getTime()"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -238,5 +243,10 @@ export default Vue.extend({
 
 .links {
   padding-top: 15px;
+}
+
+.responses-container {
+  margin-top: 32px;
+  margin-bottom: 60px;
 }
 </style>

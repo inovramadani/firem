@@ -1,18 +1,10 @@
 <template>
-  <div>
-    <div class='subtitle'>
-      here the test result:
-    </div>
-    <h2>total success calls: </h2>
-    <h2>{{ totalSuccess }}</h2>
-    <h2>total failed calls: </h2>
-    <h2>{{ totalFailed }}</h2>
-    <h2>maximum response time: </h2>
-    <h2>{{ maxTime }}</h2>
-    <h2>minimum response time: </h2>
-    <h2>{{ minTime }}</h2>
-    <h2>average response time: </h2>
-    <h2>{{ avgTime }}</h2>
+  <div class="summary-container">
+    <h2>Total success calls : {{ totalSuccess.toLocaleString() }}</h2>
+    <h2>Total failed calls : {{ totalFailed.toLocaleString() }}</h2>
+    <h2>Maximum response time : {{ maxTime.toLocaleString() }} ms</h2>
+    <h2>Minimum response time : {{ minTime.toLocaleString() }} ms</h2>
+    <h2>Average response time : {{ avgTime.toLocaleString() }} ms</h2>
   </div>
 </template>
 
@@ -28,3 +20,9 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style scoped>
+  .summary-container {
+    margin-top: 40px;
+  }
+</style>

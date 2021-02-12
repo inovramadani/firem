@@ -12,8 +12,8 @@
     <span>responseTime: </span>
     <span>{{ responseTime }}</span>
     <span>  -  </span>
-    <span>callTime: </span>
-    <span>{{ callTime }}</span>
+    <span>calledAt: </span>
+    <span>{{ calledAt }}</span>
   </div>
 </template>
 
@@ -26,7 +26,7 @@ export default Vue.extend({
     index: Number, 
     status: Number, 
     data: String, 
-    callTime: Number, 
+    calledAt: Number, 
     responseTime: Number
   }
 })
