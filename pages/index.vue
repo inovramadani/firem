@@ -61,14 +61,17 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 
 let summaryTimeout: any = null
 export default Vue.extend({
   data () {
+    const successCalls : Object[] = [];
+    const failedCalls : Object[] = [];
+
     return {
-      successCalls: [],
-      failedCalls: [],
+      successCalls,
+      failedCalls,
       maxTime: 0,
       minTime: 0,
       avgTime: 0,
@@ -80,7 +83,7 @@ export default Vue.extend({
   },
 
   methods: {
-    showSummary (calls) {
+    showSummary (calls: any) {
       /** commented out to see results changing, uncomment to see one update at last response */
       // if (summaryTimeout) clearTimeout(summaryTimeout)
       // summaryTimeout = setTimeout(() => {
@@ -101,19 +104,19 @@ export default Vue.extend({
       // }, 1000)
     },
 
-    onChangeUrl (url) {
+    onChangeUrl (url: string) {
       this.apiUrl = url
     },
 
-    onChangeToken (token) {
+    onChangeToken (token: string) {
       this.token = token
     },
 
-    onChangeHttpMethod (method) {
+    onChangeHttpMethod (method: string) {
       this.httpMethod = method
     },
 
-    onChangeNbOfCalls (amount) {
+    onChangeNbOfCalls (amount: number) {
       this.nbOfCalls = amount
     },
 
@@ -125,7 +128,7 @@ export default Vue.extend({
       this.avgTime = 0
       this.apiUrl = ''
       this.token = ''
-      this.httpMethod = 'get',
+      this.httpMethod = 'get'
       this.nbOfCalls = 0
     },
 
@@ -147,16 +150,18 @@ export default Vue.extend({
       // const url = 'https://presence-staging.voiceping.info/version'
       // const url = 'https://presence-staging.voiceping.info/api/v1/presence?userId=24479'
       // const url = 'http://localhost:8080/api/v1/presence?userId=24479'
-      const method = this.httpMethod
+      const method: any = this.httpMethod
       const data = { idx: i }
       const headers = { Authorization: `Bearer ${token}`}
 
-      axios({ 
+      const reqConfig : AxiosRequestConfig = { 
         method,
         url,
         data,
         headers
-      })
+      }
+
+      axios(reqConfig)
         .then(res => {
           // console.log('res #', i+1, new Date().getTime(), res.status, res.data)
           const result = {

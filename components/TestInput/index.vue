@@ -50,23 +50,23 @@ export default Vue.extend({
     nbOfCalls: Number
   },
   methods: {
-    onChangeAuth({ target }) {
+    onChangeAuth({ target } : { target: any}) {
       if (target.value === 'bearer') {
         this.isShowTokenInput = true
       } else {
         this.isShowTokenInput = false
       }
     },
-    onChangeHttpMethod({ target }) {
+    onChangeHttpMethod({ target } : { target: any}) {
       this.$emit('changeHttpMehod', target.value)
     },
-    onChangeUrl ({ target }) {
+    onChangeUrl ({ target } : { target: any}) {
       this.$emit('changeUrl', target.value)
     },
-    onChangeToken ({ target }) {
+    onChangeToken ({ target } : { target: any}) {
       this.$emit('changeToken', target.value)
     },
-    onChangeNbOfCalls ({ target }) {
+    onChangeNbOfCalls ({ target } : { target: any}) {
       this.$emit('changeNbOfCalls', Number(target.value))
     }
   }
